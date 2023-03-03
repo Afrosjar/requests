@@ -1,24 +1,30 @@
-import os
-import yadisk
+import requests
 
-p = os.path.abspath('HappyBirthday.txt')
-name = os.path.basename(r'HappyBirthday.txt')
+URL = 'https://cloud-api.yandex.net/v1/disk/resources'
+TOKEN = ''
+headers = {'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': f'OAuth {TOKEN}'}
 
-def make_upload(path, new_name):
-    uploader = yadisk.YaDisk(token = '**********************************')
-    if uploader.is_file(new_name) :
-        uploader.remove(new_name, permanently = True)
-        print("Предыдущий файл с таким названием удален, далее записывается новый файл с таким же названием")
-        uploader.upload(path,new_name)
-        print('Файл записан')
-    else:
-        uploader.upload(path,new_name)
-        print('Файл записан')
+# def create_folder(path):
+#     """Создание папки. \n path: Путь к создаваемой папке."""
+#     requests.put(f'{URL}?path={path}',headers = headers)
 
 
-if __name__ == '__main__':
-    make_upload(p, name)
+# create_folder('hello world')
+# create_folder('hello world/api')
 
+def upload_file(loadfile, savefile, replace=False):
+    """Загрузка файла.
+    savefile: Путь к файлу на Яндекс Диске
+    loadfile: Путь к загружаемому файлу
+    replace: true or false Замена файла на Диске"""
+    res = requests.get(f'{URL}/upload?path={savefile}&overwrite={replace}', headers=headers).json()
+    with open(loadfile, 'rb') as f:
+        try:
+            requests.put(res['href'], files={'file':f})
+        except KeyError:
+            print(res)
+
+upload_file(r'HappyBirthday.txt', '/HappyBirthday.txt', replace=True)
 
 
 
